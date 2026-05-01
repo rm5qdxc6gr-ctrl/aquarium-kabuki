@@ -145,7 +145,7 @@ function bind(){
 }
 function Header(){return `<header><button class="brand" data-go="/"><b>アクアリウムかぶき</b><small>茨城県結城市</small></button><nav>${routes.slice(0,-1).map(([l,p])=>`<button class="${state.path===p||(p==='/gallery'&&state.path.startsWith('/gallery/'))?'on':''}" data-go="${p}">${l}</button>`).join('')}</nav><div class="viewSwitch"><button class="${state.view==='pc'?'on':''}" data-view="pc">PC</button><button class="${state.view==='sp'?'on':''}" data-view="sp">スマホ</button></div><button class="cta" data-go="/contact">お問い合わせ</button><button class="hamb" data-menu>${state.menu?'×':'☰'}</button></header>`;}
 function MobileMenu(){return `<div class="mobile">${routes.map(([l,p])=>`<button data-go="${p}">${l}</button>`).join('')}</div>`;}
-function Opening(){return `<div class="openingLayer"><video class="openingVideo" src="videos/opening.mp4" autoplay muted playsinline></video><button class="skipOpening" data-skip>SKIP</button></div>`;}
+function Opening(){return `<div class="openingLayer"><video class="openingVideo" src="opening.mp4" autoplay muted playsinline></video><button class="skipOpening" data-skip>SKIP</button></div>`;}
 function Shell(sub,title,lead,body){return `<main class="shell"><p class="sub">${sub}</p><h1>${title}</h1><p class="lead">${lead}</p>${body}<button class="top" onclick="scrollTo(0,0)">ページ上部へ</button></main>`;}
 function Section(sub,title,body,white=false){return `<section class="section ${white?'white':''}"><p class="sub">${sub}</p><h2>${title}</h2>${body}</section>`;}
 function Cards(items){return `<div class="grid">${items.map(([t,d,p])=>`<article class="card" ${p?`data-go="${p}"`:''}><span>${t}</span><p>${d}</p></article>`).join('')}</div>`;}
