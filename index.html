@@ -157,7 +157,21 @@ const ADMIN_PASSWORD = 'h10a23';
 
 const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRfNvsOz8RQPs4JdkvQrEnWLITMdPIycsL7cD5USAqPdOWjFVXSPGxqtaHaPwF4RbeOUGcVi8t-6_jN/pub?gid=1840677333&single=true&output=csv';
 
-let sheetLoaded = false;
+let sheetLastText = '';
+let sheetSyncTimer = null;
+
+const state = {
+  path: getPath(),
+  menu: false,
+  view: 'pc',
+  opening: getPath() === '/',
+  adminLoggedIn: sessionStorage.getItem('ak-admin-login') === 'true',
+  edit: loadEdit()
+};
+
+function normalizeStatus(v) {
+  return String(v || '表示').replace(/\s/g, '').trim();
+}
 
 function parseCSV(text) {
   const rows = [];
@@ -199,15 +213,19 @@ function parseCSV(text) {
 }
 
 async function loadGoogleSheetFish() {
-  if (sheetLoaded) return;
-  sheetLoaded = true;
-
   try {
     const url = GOOGLE_SHEET_CSV_URL + '&t=' + Date.now();
-    const res = await fetch(url);
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('Googleスプレッドシートを読み込めませんでした');
 
     const text = await res.text();
+
+    if (text === sheetLastText) {
+      return;
+    }
+
+    sheetLastText = text;
+
     const rows = parseCSV(text).slice(1);
 
     const fish = rows
@@ -216,8 +234,8 @@ async function loadGoogleSheetFish() {
         size: (r[1] || '').trim(),
         price: (r[2] || '').trim(),
         type: (r[3] || '').trim(),
-        published: (r[4] || '表示').trim(),
-        contact: (r[5] || '表示').trim()
+        published: normalizeStatus(r[4]),
+        contact: normalizeStatus(r[5])
       }))
       .filter(item => item.name && item.published !== '非表示')
       .map(item => [item.name, item.size, item.price, item.type, item.contact]);
@@ -231,8 +249,28 @@ async function loadGoogleSheetFish() {
   }
 }
 
+function startSheetAutoSync() {
+  loadGoogleSheetFish();
+
+  if (sheetSyncTimer) clearInterval(sheetSyncTimer);
+
+  sheetSyncTimer = setInterval(() => {
+    loadGoogleSheetFish();
+  }, 60000);
+
+  window.addEventListener('focus', () => {
+    loadGoogleSheetFish();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      loadGoogleSheetFish();
+    }
+  });
+}
+
 function contactEnabled(f) {
-  return f[4] !== '非表示';
+  return normalizeStatus(f[4]) !== '非表示';
 }
 
 function productContactButton(f) {
@@ -240,25 +278,6 @@ function productContactButton(f) {
     ? '<button data-go="/contact">この生体について問い合わせる</button>'
     : '';
 }
-const state = {
-  path: getPath(),
-  menu: false,
-  view: 'pc',
-  opening: getPath() === '/',
-  adminLoggedIn: sessionStorage.getItem('ak-admin-login') === 'true',
-  edit: loadEdit()
-};
-
-function contactEnabled(f){
-  return f[4] !== '非表示';
-}
-
-function productContactButton(f){
-  return contactEnabled(f)
-    ? '<button data-go="/contact">この生体について問い合わせる</button>'
-    : '<span class="statusNote">この生体は現在、個別問い合わせを停止中です。</span>';
-}
-
 function loadEdit(){
   try { return JSON.parse(localStorage.getItem('aquarium-kabuki-edit')) || structuredClone(data); }
   catch { return structuredClone(data); }
@@ -440,19 +459,41 @@ function Support(){return Shell('DELIVERY / SETUP','設置・飼育サポート'
 function Admin(){
   if(!state.adminLoggedIn) return AdminLogin();
 
-  return Shell('ADMIN','管理者ページ','商品・お知らせ・実例集の更新と、商品ごとの問い合わせボタン表示を切り替えできます。',`
+  return Shell('ADMIN','管理者ページ','商品情報はGoogleスプレッドシートで管理します。',`
     <div class="adminTop">
       <p class="note">ログイン中：管理者</p>
       <button data-logout>ログアウト</button>
     </div>
-    <p class="note">※この簡易版は、このブラウザ内に保存されます。全ユーザーに反映する本番運用にはデータベース連携が必要です。</p>
-    ${FishAdminTable()}
-    <button data-add="fish">生体を追加</button>
-    ${AdminTable('お知らせの更新','news',state.edit.news,['カテゴリ','タイトル','本文'])}
-    <button data-add="news">お知らせを追加</button>
-    ${AdminTable('アクアリウム実例集の更新','cases',state.edit.cases,['タイトル','お客様','変化','種類','内容'])}
-    <button data-add="cases">実例を追加</button>
-    <div class="adminActions"><button data-reset>初期データに戻す</button></div>
+
+    <article class="card">
+      <em>PRODUCT MANAGEMENT</em>
+      <h3>商品管理について</h3>
+      <p>
+        生体販売の商品名・サイズ・価格・分類・掲載状態・問い合わせボタンは、Googleスプレッドシート側で管理します。
+        スプレッドシートを更新すると、公開HPの商品一覧に反映されます。
+      </p>
+      <p>
+        「掲載」を非表示にすると商品自体がHPから消えます。<br>
+        「問い合わせ」を非表示にすると商品は残り、問い合わせボタンだけ消えます。
+      </p>
+    </article>
+
+    <article class="card">
+      <em>UPDATE RULE</em>
+      <h3>反映の目安</h3>
+      <p>
+        HPはスプレッドシートを定期的に読み込みます。
+        Google側の公開CSV反映に少し時間がかかる場合があるため、変更後すぐ出ない時は1〜3分待ってから再読み込みしてください。
+      </p>
+    </article>
+
+    <article class="card">
+      <em>IMPORTANT</em>
+      <h3>注意</h3>
+      <p>
+        仕入れ値、業者名、個人情報、内部メモなど、お客さんに見せたくない情報は商品管理シートに入れないでください。
+      </p>
+    </article>
   `);
 }
 
@@ -468,22 +509,7 @@ function AdminLogin(){
 }
 
 function FishAdminTable(){
-  return `<div class="adminBlock">
-    <h3>生体販売の更新</h3>
-    ${state.edit.fish.map((row,i)=>`<article class="adminRow fishAdminRow">
-      <label>名称<input value="${esc(row[0]||'')}" data-edit="fish:${i}:0"></label>
-      <label>サイズ<input value="${esc(row[1]||'')}" data-edit="fish:${i}:1"></label>
-      <label>価格<input value="${esc(row[2]||'')}" data-edit="fish:${i}:2"></label>
-      <label>分類<input value="${esc(row[3]||'')}" data-edit="fish:${i}:3"></label>
-      <div class="toggleBox">
-        <span>問い合わせボタン</span>
-        <button type="button" class="toggleBtn ${contactEnabled(row)?'isOn':'isOff'}" data-toggle-contact="${i}">
-          ${contactEnabled(row)?'表示中':'非表示'}
-        </button>
-      </div>
-      <button data-del="fish:${i}">削除</button>
-    </article>`).join('')}
-  </div>`;
+  return '';
 }
 
 function AdminTable(title,section,rows,labels){
@@ -492,7 +518,7 @@ function AdminTable(title,section,rows,labels){
 function Footer(){return `<footer><b>アクアリウムかぶき</b><p>観賞魚・大型魚・飼育機材・オーダー水槽の専門店。</p><small>© 2026 Aquarium Kabuki All Rights Reserved.</small></footer>`;}
 
 render();
-loadGoogleSheetFish();
+startSheetAutoSync();
     
 </script>
 </body>
