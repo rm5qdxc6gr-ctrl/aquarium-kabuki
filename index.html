@@ -388,6 +388,29 @@ function FishCards(){
     </article>
   `).join('')}</div>`;
 }
+function NewsCards(){
+  return `<div class="grid">${state.edit.news.map(n=>`
+    <article class="card">
+      <em>${esc(n[0])}</em>
+      <h3>${esc(n[1])}</h3>
+      <p>${esc(n[2])}</p>
+    </article>
+  `).join('')}</div>`;
+}
+
+function Equipment(){
+  return Shell(
+    'EQUIPMENT',
+    '飼育機材',
+    '大型魚・熱帯魚の飼育に必要な機材を、水槽サイズや魚種に合わせて提案します。',
+    Cards([
+      ['ろ過設備','上部・外部フィルター、濾材、ポンプ類'],
+      ['照明','水槽サイズや見せ方に合わせたLED'],
+      ['水質管理','カルキ抜き、バクテリア、pH管理'],
+      ['餌・添加剤','アロワナ・大型魚向けフード']
+    ])
+  );
+}
 function CaseCards(){return `<div class="grid">${state.edit.cases.map((c,i)=>`<article class="card" data-go="/gallery/${i}"><em>${esc(c[3])}</em><h3>${esc(c[0])}</h3><p>${esc(c[1])} / ${esc(c[2])}</p><b>詳細を見る →</b></article>`).join('')}</div>`;}
 function Home(){return `<section class="hero"><div><p class="sub redText">YUKI IBARAKI</p><h1>アクアリウム<br>かぶき</h1><p>美しい観賞魚と理想の水景を、もっと身近に。生体販売から飼育機材、オーダー水槽、飼育実績のご紹介までサポートします。</p><button data-go="/sell">生体を見る</button><button class="ghost" data-go="/contact">お問い合わせ</button></div></section>${Section('SERVICE','取り扱いサービス',Cards([['生体販売','アロワナ・大型魚・熱帯魚をご案内します。','/sell'],['飼育機材','フィルター・照明・餌など幅広く対応。','/equipment'],['オーダー水槽','理想の水槽づくりをサポートします。','/order']]))}${Section('FEATURED','おすすめ生体',FishCards(),true)}${Section('OWNERS GALLERY','アクアリウム実例集',`<p class="lead">オーナー様・店舗での飼育実績、オーダー水槽の現在、生体の成長記録を掲載。</p>${CaseCards()}<button data-go="/gallery">実例集をもっと見る</button><p class="note">※掲載写真はお客様の許可をいただいた実例のみ掲載しています。写真・文章の無断転載を禁止します。</p>`)}${Section('NEWS','お知らせ・ブログ',NewsCards(),true)}${Section('ACCESS','店舗情報・アクセス',`${AccessBlock()}<button data-go="/access">アクセス詳細を見る</button>`)}${Section('CONTACT','お問い合わせ',`<p class="lead">在庫確認、飼育相談、オーダー水槽、機材取り寄せなどお気軽にお問い合わせください。</p><button data-go="/contact">お問い合わせフォームへ</button>`,true)}`;}
 function Sell(){
