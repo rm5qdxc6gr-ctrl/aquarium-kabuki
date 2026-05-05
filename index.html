@@ -470,24 +470,31 @@ async function loadGoogleSheetEquipmentGroup(config){
     const header = parsed[0] || [];
     const rows = parsed.slice(1);
 
-    const h0 = String(header[0] || '').trim();
-    const h1 = String(header[1] || '').trim();
-    const h2 = String(header[2] || '').trim();
-    const h3 = String(header[3] || '').trim();
-    const h4 = String(header[4] || '').trim();
-    const h5 = String(header[5] || '').trim();
+    const cleanHeader = header.map(h =>
+      String(h || '')
+        .replace(/\s/g,'')
+        .replace(/　/g,'')
+        .trim()
+    );
+
+    const h0 = cleanHeader[0] || '';
+    const h1 = cleanHeader[1] || '';
+    const h2 = cleanHeader[2] || '';
+    const h3 = cleanHeader[3] || '';
+    const h4 = cleanHeader[4] || '';
+    const h5 = cleanHeader[5] || '';
 
     const isEquipmentSheet =
       h0 === '商品名' &&
-      h1 === '規格・対応サイズ' &&
       h2 === '価格' &&
-      h3 === '説明' &&
       h4 === '掲載' &&
-      h5 === '問い合わせ';
+      h5 === '問い合わせ' &&
+      h1.includes('規格') &&
+      h3.includes('説明');
 
     if(!isEquipmentSheet){
       console.warn(
-        `${config.sheet} の列見出しが飼育機材用ではありません。読み込みを停止しました。`,
+        `${config.sheet} の列見出しが飼育機材用ではありません。`,
         header
       );
 
