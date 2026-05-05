@@ -201,6 +201,67 @@
   flex-wrap:wrap;
   margin-top:14px;
 }
+    .sheetOpenArea{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+
+/* ここから追加 */
+.equipmentBackArea{
+  margin:0 0 18px;
+  display:flex;
+  justify-content:center;
+}
+
+.ghostDark{
+  background:#111827!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
+
+.equipmentTabs{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin:0 0 28px;
+}
+
+.equipmentTabs button{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#111827;
+  box-shadow:none;
+  border-radius:999px;
+  padding:10px 14px;
+  font-size:13px;
+  font-weight:900;
+}
+
+.equipmentTabs button.active{
+  background:linear-gradient(135deg,#8f1010,#dc2626 60%,#ef4444);
+  color:#fff;
+  border-color:#dc2626;
+  box-shadow:0 14px 30px #7f1d1d28;
+}
+
+@media(max-width:850px){
+  .equipmentTabs{
+    justify-content:flex-start;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    padding-bottom:6px;
+  }
+
+  .equipmentTabs button{
+    flex:0 0 auto;
+    font-size:12px;
+    padding:9px 12px;
+  }
+}
+/* ここまで追加 */
   </style>
 </head>
 
@@ -689,8 +750,14 @@ function equipmentContactButton(item){
 
           <nav>
             ${routes.slice(0,-1).map(([l,p]) => `
-              <button class="${state.path === p || (p === '/gallery' && state.path.startsWith('/gallery/')) ? 'on' : ''}" data-go="${p}">
-                ${l}
+              <button class="${
+  state.path === p ||
+  (p === '/gallery' && state.path.startsWith('/gallery/')) ||
+  (p === '/equipment' && state.path.startsWith('/equipment'))
+    ? 'on'
+    : ''
+}" data-go="${p}">
+${l}
               </button>
             `).join('')}
           </nav>
@@ -896,49 +963,45 @@ function EquipmentCategoryPage(config){
     config.title,
     config.lead,
     `
-      <div class="grid">
+      <div class="equipmentBackArea">
+        <button class="ghostDark" data-go="/equipment">← 飼育機材トップに戻る</button>
+      </div>
+
+      <div class="equipmentTabs">
         ${EQUIPMENT_SHEETS.map(group => `
-          <article class="card ${group.key === config.key ? 'hot' : 'equipmentNavCard'}" data-go="/equipment/${group.key}">
-            <em>${esc(group.sheet)}</em>
-            <h3>${esc(group.title)}</h3>
-            <p>${esc(group.lead)}</p>
-            <b>${group.key === config.key ? '現在表示中' : 'このカテゴリを見る →'}</b>
-          </article>
+          <button
+            class="${group.key === config.key ? 'active' : ''}"
+            data-go="/equipment/${group.key}"
+          >
+            ${esc(group.title)}
+          </button>
         `).join('')}
       </div>
 
-      <section class="adminBlock equipmentSection">
-        <p class="sub">${esc(config.sheet)}</p>
-        <h3 class="flowTitle">${esc(config.title)}</h3>
-        <p class="lead">${esc(config.lead)}</p>
-
-        ${
-          items.length
-            ? `
-              <div class="grid">
-                ${items.map(item => `
-                  <article class="card">
-                    <em>${esc(config.title)}</em>
-                    <h3>${esc(item[0])}</h3>
-                    <p>${esc(item[1])}</p>
-                    <p>${esc(item[3])}</p>
-                    <b>${esc(item[2])}</b>
-                    ${equipmentContactButton(item)}
-                  </article>
-                `).join('')}
-              </div>
-            `
-            : `
-              <article class="card">
-                <em>${esc(config.title)}</em>
-                <h3>現在準備中です</h3>
-                <p>商品情報は店頭またはお問い合わせにてご確認ください。</p>
-              </article>
-            `
-        }
-      </section>
-
-      <button data-go="/equipment">飼育機材一覧に戻る</button>
+      ${
+        items.length
+          ? `
+            <div class="list">
+              ${items.map(item => `
+                <article class="card">
+                  <em>${esc(config.title)}</em>
+                  <h3>${esc(item[0])}</h3>
+                  <p>${esc(item[1])}</p>
+                  <p>${esc(item[3])}</p>
+                  <b>${esc(item[2])}</b>
+                  ${equipmentContactButton(item)}
+                </article>
+              `).join('')}
+            </div>
+          `
+          : `
+            <article class="card">
+              <em>${esc(config.title)}</em>
+              <h3>現在準備中です</h3>
+              <p>商品情報は店頭またはお問い合わせにてご確認ください。</p>
+            </article>
+          `
+      }
     `
   );
 }
