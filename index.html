@@ -579,47 +579,48 @@ function equipmentContactButton(item){
       render();
     });
 
-    function render(){
-      const caseNo = state.path.startsWith('/gallery/') ? Number(state.path.split('/').pop()) : -1;
-      const currentCase = state.edit.cases[caseNo];
+ function render(){
+  const caseNo = state.path.startsWith('/gallery/') ? Number(state.path.split('/').pop()) : -1;
+  const currentCase = state.edit.cases[caseNo];
 
-      let page = '';
+  const equipmentMatch = state.path.startsWith('/equipment/')
+    ? state.path.split('/')[2]
+    : null;
 
-      if(state.path === '/') page = Home();
-      else if(state.path === '/sell') page = Sell();
-      else if(state.path === '/equipment') page = Equipment();
-      else if(state.path === '/order') page = Order();
-      else if(state.path === '/support') page = Support();
-      else if(state.path === '/gallery') page = Gallery();
-      else if(currentCase) page = CaseDetail(currentCase);
-      else if(state.path === '/news') page = NewsPage();
-      else if(state.path === '/access') page = AccessPage();
-      else if(state.path === '/contact') page = Contact();
-      else if(state.path === '/admin') page = Admin();
-      else page = Shell('404','ページが見つかりません','指定されたURLは存在しません。','<button data-go="/">ホームへ戻る</button>');
+  const currentEquipment = EQUIPMENT_SHEETS.find(x => x.key === equipmentMatch);
 
-      document.getElementById('app').innerHTML = `
-        <div class="site ${state.view === 'sp' ? 'mobileView' : 'pcView'}">
-          ${state.opening ? Opening() : ''}
-          ${Header()}
-          ${state.menu ? MobileMenu() : ''}
-          ${page}
-          ${Footer()}
-        </div>
-      `;
+  let page = '';
 
-      bind();
-    }
+  if(state.path === '/') page = Home();
+  else if(state.path === '/sell') page = Sell();
+  else if(state.path === '/equipment') page = Equipment();
+  else if(currentEquipment) page = EquipmentCategoryPage(currentEquipment);
+  else if(state.path === '/order') page = Order();
+  else if(state.path === '/support') page = Support();
+  else if(state.path === '/gallery') page = Gallery();
+  else if(currentCase) page = CaseDetail(currentCase);
+  else if(state.path === '/news') page = NewsPage();
+  else if(state.path === '/access') page = AccessPage();
+  else if(state.path === '/contact') page = Contact();
+  else if(state.path === '/admin') page = Admin();
+  else page = Shell('404','ページが見つかりません','指定されたURLは存在しません。','<button data-go="/">ホームへ戻る</button>');
+
+  document.getElementById('app').innerHTML = `
+    <div class="site ${state.view === 'sp' ? 'mobileView' : 'pcView'}">
+      ${state.opening ? Opening() : ''}
+      ${Header()}
+      ${state.menu ? MobileMenu() : ''}
+      ${page}
+      ${Footer()}
+    </div>
+  `;
+
+  bind();
+}
 
     function bind(){
       document.querySelectorAll('[data-go]').forEach(e => e.onclick = () => go(e.dataset.go));
 
-      document.querySelectorAll('[data-scroll]').forEach(e => e.onclick = () => {
-  const target = document.getElementById(e.dataset.scroll);
-  if(target){
-    target.scrollIntoView({ behavior:'smooth', block:'start' });
-  }
-});
       document.querySelectorAll('[data-view]').forEach(e => e.onclick = () => {
         state.view = e.dataset.view;
         render();
@@ -865,11 +866,11 @@ function Equipment(){
   return Shell(
     'EQUIPMENT',
     '飼育機材',
-    '大型魚・熱帯魚の飼育に必要な機材を、カテゴリ別に掲載しています。餌・濾過設備・照明・水質管理用品など、水槽サイズや魚種に合わせてご案内します。',
+    'カテゴリ別に飼育機材を掲載しています。見たいカテゴリを選んでください。',
     `
       <div class="grid">
         ${EQUIPMENT_SHEETS.map(config => `
-          <article class="card equipmentNavCard" data-scroll="equipment-${esc(config.key)}">
+          <article class="card equipmentNavCard" data-go="/equipment/${config.key}">
             <em>${esc(config.sheet)}</em>
             <h3>${esc(config.title)}</h3>
             <p>${esc(config.lead)}</p>
@@ -877,49 +878,64 @@ function Equipment(){
           </article>
         `).join('')}
       </div>
-
-      ${EQUIPMENT_SHEETS.map(config => EquipmentGroupBlock(config)).join('')}
     `
   );
 }
-
-    function EquipmentGroupBlock(config){
+function EquipmentCategoryPage(config){
   const items = state.edit.equipment?.[config.key] || [];
 
-  return `
-    <section class="adminBlock equipmentSection" id="equipment-${esc(config.key)}">
-      <p class="sub">${esc(config.sheet)}</p>
-      <h3 class="flowTitle">${esc(config.title)}</h3>
-      <p class="lead">${esc(config.lead)}</p>
+  return Shell(
+    'EQUIPMENT',
+    config.title,
+    config.lead,
+    `
+      <div class="grid">
+        ${EQUIPMENT_SHEETS.map(group => `
+          <article class="card ${group.key === config.key ? 'hot' : 'equipmentNavCard'}" data-go="/equipment/${group.key}">
+            <em>${esc(group.sheet)}</em>
+            <h3>${esc(group.title)}</h3>
+            <p>${esc(group.lead)}</p>
+            <b>${group.key === config.key ? '現在表示中' : 'このカテゴリを見る →'}</b>
+          </article>
+        `).join('')}
+      </div>
 
-      ${
-        items.length
-          ? `
-            <div class="grid">
-              ${items.map(item => `
-                <article class="card">
-                  <em>${esc(config.title)}</em>
-                  <h3>${esc(item[0])}</h3>
-                  <p>${esc(item[1])}</p>
-                  <p>${esc(item[3])}</p>
-                  <b>${esc(item[2])}</b>
-                  ${equipmentContactButton(item)}
-                </article>
-              `).join('')}
-            </div>
-          `
-          : `
-            <article class="card">
-              <em>${esc(config.title)}</em>
-              <h3>現在準備中です</h3>
-              <p>商品情報は店頭またはお問い合わせにてご確認ください。</p>
-            </article>
-          `
-      }
-    </section>
-  `;
+      <section class="adminBlock equipmentSection">
+        <p class="sub">${esc(config.sheet)}</p>
+        <h3 class="flowTitle">${esc(config.title)}</h3>
+        <p class="lead">${esc(config.lead)}</p>
+
+        ${
+          items.length
+            ? `
+              <div class="grid">
+                ${items.map(item => `
+                  <article class="card">
+                    <em>${esc(config.title)}</em>
+                    <h3>${esc(item[0])}</h3>
+                    <p>${esc(item[1])}</p>
+                    <p>${esc(item[3])}</p>
+                    <b>${esc(item[2])}</b>
+                    ${equipmentContactButton(item)}
+                  </article>
+                `).join('')}
+              </div>
+            `
+            : `
+              <article class="card">
+                <em>${esc(config.title)}</em>
+                <h3>現在準備中です</h3>
+                <p>商品情報は店頭またはお問い合わせにてご確認ください。</p>
+              </article>
+            `
+        }
+      </section>
+
+      <button data-go="/equipment">飼育機材一覧に戻る</button>
+    `
+  );
 }
-
+    
     function Order(){
       return Shell(
         'CUSTOM TANK',
