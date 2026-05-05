@@ -268,7 +268,7 @@
 
 /* 問い合わせボタン共通：一行表示＋上の文字から離す */
 .card button[data-go="/contact"]{
-  margin-top:22px!important;
+  margin-top:24px!important;
   white-space:nowrap!important;
   word-break:keep-all!important;
   line-height:1.2!important;
@@ -281,8 +281,24 @@
   width:100%;
   white-space:nowrap!important;
   word-break:keep-all!important;
-  font-size:14px;
-  padding:13px 10px;
+  font-size:13px;
+  padding:13px 8px;
+}
+
+/* セクション直下のボタンを中央揃え */
+.section > button{
+  display:block;
+  width:fit-content;
+  max-width:100%;
+  margin:28px auto 0;
+}
+
+/* 実例集・アクセス・お問い合わせボタンの見た目整理 */
+.section > button[data-go="/gallery"],
+.section > button[data-go="/access"],
+.section > button[data-go="/contact"]{
+  white-space:nowrap;
+  word-break:keep-all;
 }
 
 /* 生体販売ページ・飼育機材ページの問い合わせボタンも少し離す */
@@ -294,8 +310,8 @@
 @media(min-width:851px){
   .grid.four .card button[data-go="/contact"]{
     font-size:13px;
-    padding-left:10px;
-    padding-right:10px;
+    padding-left:8px;
+    padding-right:8px;
   }
 }
 
@@ -324,11 +340,11 @@
   .card button[data-go="/contact"]{
     width:100%;
     font-size:14px;
-    /* セクション直下のボタンを中央揃え */
-.section > button{
-  display:block;
-  width:fit-content;
-  margin:28px auto 0;
+  }
+
+  .section > button{
+    width:100%;
+    max-width:320px;
   }
 }
   </style>
