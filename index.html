@@ -174,7 +174,7 @@
       .mobileView nav,.mobileView .cta{display:none}
       .mobileView .hamb{display:block}
     }
-  .adminBlock{
+.adminBlock{
   margin:34px 0;
   padding:24px;
   border:1px solid #e5e7eb;
@@ -245,7 +245,7 @@
 .fishCard{
   display:flex!important;
   flex-direction:column!important;
-  min-height:305px;
+  min-height:315px;
 }
 
 .fishCardMain{
@@ -259,19 +259,44 @@
 .fishCardBottom{
   margin-top:auto;
   display:grid;
-  gap:10px;
+  gap:16px;
 }
 
 .fishCardBottom b{
   margin-top:0!important;
 }
 
-.fishCardBottom button{
+/* 問い合わせボタン共通：一行表示＋上の文字から離す */
+.card button[data-go="/contact"]{
+  margin-top:22px!important;
+  white-space:nowrap!important;
+  word-break:keep-all!important;
+  line-height:1.2!important;
+  font-size:14px;
+  padding:13px 18px;
+}
+
+.fishCardBottom button[data-go="/contact"]{
+  margin-top:0!important;
   width:100%;
-  margin:0;
-  white-space:normal;
-  line-height:1.4;
-  padding:12px 14px;
+  white-space:nowrap!important;
+  word-break:keep-all!important;
+  font-size:14px;
+  padding:13px 10px;
+}
+
+/* 生体販売ページ・飼育機材ページの問い合わせボタンも少し離す */
+.list .card button[data-go="/contact"]{
+  margin-top:24px!important;
+}
+
+/* 文字が長くても一行に収めやすくする */
+@media(min-width:851px){
+  .grid.four .card button[data-go="/contact"]{
+    font-size:13px;
+    padding-left:10px;
+    padding-right:10px;
+  }
 }
 
 @media(max-width:850px){
@@ -294,6 +319,11 @@
 
   .fishCard h3{
     min-height:auto;
+  }
+
+  .card button[data-go="/contact"]{
+    width:100%;
+    font-size:14px;
   }
 }
   </style>
