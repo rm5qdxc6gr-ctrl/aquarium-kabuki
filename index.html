@@ -259,6 +259,29 @@
     flex:0 0 auto;
     font-size:12px;
     padding:9px 12px;
+  /* おすすめ生体カードのボタン位置を揃える */
+.grid.four > .card{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+
+.grid.four > .card b{
+  margin-top:auto;
+}
+
+.grid.four > .card button{
+  margin-top:12px;
+  width:100%;
+  max-width:100%;
+  white-space:normal;
+  line-height:1.4;
+  padding:12px 14px;
+}
+
+@media(min-width:851px){
+  .grid.four > .card{
+    min-height:300px;
   }
 }
 /* ここまで追加 */
