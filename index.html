@@ -347,6 +347,33 @@
     max-width:320px;
   }
 }
+
+
+/* 商品画像表示 */
+.productImageCard{
+  overflow:hidden;
+}
+
+.productImageWrap{
+  width:100%;
+  aspect-ratio:4 / 3;
+  border-radius:20px;
+  overflow:hidden;
+  background:#f8fafc;
+  margin-bottom:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #eef2f7;
+}
+
+.productImageWrap img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  padding:10px;
+}
   </style>
 </head>
 
@@ -481,6 +508,22 @@ const GOOGLE_SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_S
       return String(v || '表示').replace(/\s/g,'').trim();
     }
 
+    function normalizeImageUrl(url){
+      if(!url) return '';
+
+      const text = String(url).trim();
+
+      const driveMatch =
+        text.match(/\/file\/d\/([^/]+)/) ||
+        text.match(/[?&]id=([^&]+)/);
+
+      if(driveMatch && driveMatch[1]){
+        return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w1200`;
+      }
+
+      return text;
+    }
+
     function parseCSV(text){
       const rows = [];
       let row = [];
@@ -541,10 +584,11 @@ const GOOGLE_SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_S
             price: (r[2] || '').trim(),
             type: (r[3] || '').trim(),
             published: normalizeStatus(r[4]),
-            contact: normalizeStatus(r[5])
+            contact: normalizeStatus(r[5]),
+            image: normalizeImageUrl(r[6])
           }))
           .filter(item => item.name && item.published !== '非表示')
-          .map(item => [item.name, item.size, item.price, item.type, item.contact]);
+          .map(item => [item.name, item.size, item.price, item.type, item.contact, item.image]);
 
        state.edit.fish = fish;
 render();
@@ -656,7 +700,8 @@ async function loadGoogleSheetEquipmentGroup(config){
         price: (r[2] || '').trim(),
         description: (r[3] || '').trim(),
         published: normalizeStatus(r[4]),
-        contact: normalizeStatus(r[5])
+        contact: normalizeStatus(r[5]),
+        image: normalizeImageUrl(r[6])
       }))
       .filter(item => item.name && item.published !== '非表示')
       .map(item => [
@@ -664,7 +709,8 @@ async function loadGoogleSheetEquipmentGroup(config){
         item.spec,
         item.price,
         item.description,
-        item.contact
+        item.contact,
+        item.image
       ]);
 
     state.edit.equipment[config.key] = items;
@@ -913,11 +959,22 @@ ${l}
       `;
     }
 
+   function ProductImage(src, alt){
+  return src
+    ? `
+      <div class="productImageWrap">
+        <img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">
+      </div>
+    `
+    : '';
+}
+
    function FishCards(){
   return `
     <div class="grid four">
       ${state.edit.fish.map(f => `
-        <article class="card fishCard">
+        <article class="card fishCard productImageCard">
+          ${ProductImage(f[5], f[0])}
           <div class="fishCardMain">
             <em>${esc(f[3])}</em>
             <h3>${esc(f[0])}</h3>
@@ -1012,7 +1069,8 @@ ${l}
         `
           <div class="list">
             ${state.edit.fish.map(f => `
-              <article class="card">
+              <article class="card productImageCard">
+                ${ProductImage(f[5], f[0])}
                 <em>${esc(f[3])}</em>
                 <h3>${esc(f[0])}</h3>
                 <p>${esc(f[1])} / 状態確認・取り置き相談可</p>
@@ -1073,7 +1131,8 @@ function EquipmentCategoryPage(config){
           ? `
             <div class="list">
               ${items.map(item => `
-                <article class="card">
+                <article class="card productImageCard">
+                  ${ProductImage(item[5], item[0])}
                   <em>${esc(config.title)}</em>
                   <h3>${esc(item[0])}</h3>
                   <p>${esc(item[1])}</p>
@@ -1334,6 +1393,8 @@ function EquipmentCategoryPage(config){
               <tr><td>D列</td><td>分類</td><td>アロワナ</td><td>赤文字の分類ラベル</td></tr>
               <tr><td>E列</td><td>掲載</td><td>表示 / 非表示</td><td>商品をHPに出すか消すか</td></tr>
               <tr><td>F列</td><td>問い合わせ</td><td>表示 / 非表示</td><td>問い合わせボタンを出すか消すか</td></tr>
+              <tr><td>G列</td><td>画像URL</td><td>https://drive.google.com/thumbnail?id=...</td><td>商品画像を表示</td></tr>
+              <tr><td>H列</td><td>画像検索名</td><td>辣椒紅龍 24cm前後</td><td>Apps Scriptの画像自動照合に使用</td></tr>
             </tbody>
           </table>
         </div>
@@ -1360,27 +1421,27 @@ function EquipmentCategoryPage(config){
               <tr>
                 <td>餌管理</td>
                 <td>餌・フード類</td>
-                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ</td>
+                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ / G:画像URL / H:画像検索名</td>
               </tr>
               <tr>
                 <td>濾過設備管理</td>
                 <td>フィルター・濾材・ポンプ類</td>
-                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ</td>
+                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ / G:画像URL / H:画像検索名</td>
               </tr>
               <tr>
                 <td>照明管理</td>
                 <td>LEDライト・照明用品</td>
-                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ</td>
+                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ / G:画像URL / H:画像検索名</td>
               </tr>
               <tr>
                 <td>水質管理</td>
                 <td>カルキ抜き・バクテリア・添加剤</td>
-                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ</td>
+                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ / G:画像URL / H:画像検索名</td>
               </tr>
               <tr>
                 <td>水槽用品管理</td>
                 <td>ヒーター・エア用品・メンテナンス用品</td>
-                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ</td>
+                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ / G:画像URL / H:画像検索名</td>
               </tr>
             </tbody>
           </table>
@@ -1476,6 +1537,7 @@ function EquipmentCategoryPage(config){
         <div class="adminChecklist">
           ・シート名が指定通りになっている<br>
           ・A〜F列の順番が変わっていない<br>
+          ・画像を出す場合はG列に画像URLが入っている<br>
           ・A列の商品名が空欄になっていない<br>
           ・E列の掲載が <b>表示</b> になっている<br>
           ・問い合わせボタンを出したい場合、F列が <b>表示</b> になっている<br>
