@@ -374,6 +374,1674 @@
   display:block;
   padding:10px;
 }
+
+
+/* 商品一覧を5列コンパクト表示 */
+.productListGrid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:14px;
+  align-items:stretch;
+}
+
+.productListGrid .card{
+  padding:16px;
+  border-radius:22px;
+  display:flex;
+  flex-direction:column;
+  min-height:100%;
+}
+
+.productListGrid .productImageWrap{
+  aspect-ratio:1 / 1;
+  border-radius:16px;
+  margin-bottom:10px;
+}
+
+.productListGrid .productImageWrap img{
+  padding:8px;
+}
+
+.productListGrid em{
+  font-size:9px;
+  letter-spacing:.14em;
+}
+
+.productListGrid .card h3{
+  font-size:16px;
+  line-height:1.35;
+  letter-spacing:.02em;
+  margin:8px 0 6px;
+  min-height:44px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.productListGrid .card p{
+  font-size:12px;
+  line-height:1.55;
+  margin:6px 0;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.productListGrid .card b{
+  font-size:13px;
+  margin-top:auto;
+  padding-top:8px;
+}
+
+.productListGrid .card button[data-go="/contact"]{
+  width:100%;
+  margin-top:12px!important;
+  padding:10px 8px;
+  font-size:11px;
+  line-height:1.25!important;
+  white-space:normal!important;
+}
+
+@media(max-width:1100px){
+  .productListGrid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+}
+
+@media(max-width:850px){
+  .productListGrid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+  }
+
+  .productListGrid .card{
+    padding:13px;
+    border-radius:20px;
+  }
+
+  .productListGrid .card h3{
+    font-size:15px;
+    min-height:41px;
+  }
+
+  .productListGrid .card p{
+    font-size:12px;
+  }
+
+  .productListGrid .card button[data-go="/contact"]{
+    font-size:11px;
+    padding:10px 6px;
+  }
+}
+
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <script>
+    const routes = [
+      ['ホーム','/'],
+      ['生体販売','/sell'],
+      ['飼育機材','/equipment'],
+      ['オーダー水槽','/order'],
+      ['アクアリウム実例集','/gallery'],
+      ['お知らせ','/news'],
+      ['アクセス','/access'],
+      ['お問い合わせ','/contact']
+    ];
+
+    const data = {
+      fish: [
+        ['辣椒紅龍','24cm前後','¥158,000','アロワナ','表示'],
+        ['過背金龍','23cm前後','¥168,000','金龍','表示'],
+        ['シルバーアロワナ','20cm前後','¥25,000','銀龍','表示'],
+        ['ディスカス レッド','12cm前後','¥9,800','ディスカス','表示']
+      ],
+      news: [
+        ['お知らせ','営業時間変更のお知らせ','営業時間・臨時休業はこちらでご案内します。'],
+        ['ブログ','アロワナ飼育のポイント','水温・水質・餌・混泳の基本を紹介します。'],
+        ['入荷情報','辣椒紅龍・大型魚 入荷','発色の良い個体が入荷しました。']
+      ],
+      cases: [
+        ['辣椒紅龍 成長記録','小山市 K様','購入時24cm → 現在38cm','購入生体の成長記録','アロワナ'],
+        ['大型アロワナ水槽 導入事例','結城市 O様','納品時 → 3ヶ月後 → 現在','オーダー水槽実績','大型魚水槽'],
+        ['ディスカス レッド 飼育実例','筑西市 S様','購入時12cm → 現在15cm','購入生体の成長記録','ディスカス']
+      ],
+      equipment: {
+  food: [
+    ['ひかりクレスト カーニバル','210g','店舗確認','アロワナ・大型魚向けフード','表示']
+  ],
+  filter: [
+    ['外部フィルター','60〜90cm水槽用','店舗確認','水槽サイズに合わせてご案内します','表示']
+  ],
+  light: [
+    ['LEDライト','90cm水槽用','店舗確認','水槽の見せ方に合わせて提案します','表示']
+  ],
+  water: [
+    ['カルキ抜き・バクテリア','各種','店舗確認','立ち上げ・水換え時の水質管理に','表示']
+  ],
+  goods: [
+    ['ヒーター・エア用品','各種','店舗確認','水槽サイズや用途に合わせてご案内します','表示']
+  ]
+}
+    };
+
+    const ADMIN_PASSWORD = 'h10a23';
+
+  const GOOGLE_SHEET_ID = '1ZaKjWWmr77HDfF-slevKeYg0R_Kzbys0GrlENHfLtF8';
+const GOOGLE_SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit?gid=1110921244#gid=1110921244`;
+    
+    const PRODUCT_SHEET_NAME = '商品管理';
+    const NEWS_SHEET_NAME = 'お知らせ管理';
+    const CASES_SHEET_NAME = '実例管理';
+    const EQUIPMENT_SHEETS = [
+  {
+    key: 'food',
+    title: '餌・フード',
+    sheet: '餌管理',
+    lead: 'アロワナ・大型魚・熱帯魚向けのフード類を掲載します。'
+  },
+  {
+    key: 'filter',
+    title: '濾過設備',
+    sheet: '濾過設備管理',
+    lead: '外部フィルター、上部フィルター、濾材、ポンプ類を掲載します。'
+  },
+  {
+    key: 'light',
+    title: '照明',
+    sheet: '照明管理',
+    lead: 'LEDライトや水槽の見せ方に関わる照明用品を掲載します。'
+  },
+  {
+    key: 'water',
+    title: '水質管理',
+    sheet: '水質管理',
+    lead: 'カルキ抜き、バクテリア、添加剤など水質管理用品を掲載します。'
+  },
+  {
+    key: 'goods',
+    title: '水槽用品',
+    sheet: '水槽用品管理',
+    lead: 'ヒーター、エア用品、メンテナンス用品などを掲載します。'
+  }
+];
+
+    function sheetCsvUrl(sheetName){
+      return `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&t=${Date.now()}`;
+    }
+
+    const sheetLastText = {
+  fish: '',
+  news: '',
+  cases: '',
+  equipment: {}
+};
+    let sheetSyncTimer = null;
+
+    const state = {
+      path: getPath(),
+      menu: false,
+      view: 'pc',
+      opening: getPath() === '/',
+      adminLoggedIn: sessionStorage.getItem('ak-admin-login') === 'true',
+      edit: structuredClone(data)
+    };
+
+    function getPath(){
+      return location.hash ? (location.hash.slice(1) || '/') : '/';
+    }
+
+    function esc(v){
+      return String(v ?? '').replace(/[&<>"']/g, m => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#039;'
+      }[m]));
+    }
+
+    function normalizeStatus(v){
+      return String(v || '表示').replace(/\s/g,'').trim();
+    }
+
+    function normalizeImageUrl(url){
+      if(!url) return '';
+
+      const text = String(url).trim();
+
+      const driveMatch =
+        text.match(/\/file\/d\/([^/]+)/) ||
+        text.match(/[?&]id=([^&]+)/);
+
+      if(driveMatch && driveMatch[1]){
+        return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w1200`;
+      }
+
+      return text;
+    }
+
+    function parseCSV(text){
+      const rows = [];
+      let row = [];
+      let cell = '';
+      let inQuotes = false;
+
+      for(let i=0;i<text.length;i++){
+        const char = text[i];
+        const next = text[i+1];
+
+        if(char === '"' && inQuotes && next === '"'){
+          cell += '"';
+          i++;
+        }else if(char === '"'){
+          inQuotes = !inQuotes;
+        }else if(char === ',' && !inQuotes){
+          row.push(cell);
+          cell = '';
+        }else if((char === '\n' || char === '\r') && !inQuotes){
+          if(cell || row.length){
+            row.push(cell);
+            rows.push(row);
+            row = [];
+            cell = '';
+          }
+          if(char === '\r' && next === '\n') i++;
+        }else{
+          cell += char;
+        }
+      }
+
+      if(cell || row.length){
+        row.push(cell);
+        rows.push(row);
+      }
+
+      return rows;
+    }
+
+    async function fetchSheet(sheetName){
+      const res = await fetch(sheetCsvUrl(sheetName), { cache:'no-store' });
+      if(!res.ok) throw new Error(`${sheetName}を読み込めませんでした`);
+      return await res.text();
+    }
+
+    async function loadGoogleSheetFish(){
+      try{
+        const text = await fetchSheet(PRODUCT_SHEET_NAME);
+        if(text === sheetLastText.fish) return;
+        sheetLastText.fish = text;
+
+        const rows = parseCSV(text).slice(1);
+
+        const fish = rows
+          .map(r => ({
+            name: (r[0] || '').trim(),
+            size: (r[1] || '').trim(),
+            price: (r[2] || '').trim(),
+            type: (r[3] || '').trim(),
+            published: normalizeStatus(r[4]),
+            contact: normalizeStatus(r[5]),
+            image: normalizeImageUrl(r[6])
+          }))
+          .filter(item => item.name && item.published !== '非表示')
+          .map(item => [item.name, item.size, item.price, item.type, item.contact, item.image]);
+
+       state.edit.fish = fish;
+render();
+      }catch(error){
+        console.warn(error);
+      }
+    }
+
+    async function loadGoogleSheetNews(){
+      try{
+        const text = await fetchSheet(NEWS_SHEET_NAME);
+        if(text === sheetLastText.news) return;
+        sheetLastText.news = text;
+
+        const rows = parseCSV(text).slice(1);
+
+        const news = rows
+          .map(r => ({
+            category: (r[0] || '').trim(),
+            title: (r[1] || '').trim(),
+            body: (r[2] || '').trim(),
+            published: normalizeStatus(r[3])
+          }))
+          .filter(item => item.title && item.published !== '非表示')
+          .map(item => [item.category || 'お知らせ', item.title, item.body]);
+
+    state.edit.news = news;
+render();
+      }catch(error){
+        console.warn(error);
+      }
+    }
+
+    async function loadGoogleSheetCases(){
+      try{
+        const text = await fetchSheet(CASES_SHEET_NAME);
+        if(text === sheetLastText.cases) return;
+        sheetLastText.cases = text;
+
+        const rows = parseCSV(text).slice(1);
+
+        const cases = rows
+          .map(r => ({
+            title: (r[0] || '').trim(),
+            customer: (r[1] || '').trim(),
+            change: (r[2] || '').trim(),
+            type: (r[3] || '').trim(),
+            body: (r[4] || '').trim(),
+            published: normalizeStatus(r[5])
+          }))
+          .filter(item => item.title && item.published !== '非表示')
+          .map(item => [item.title, item.customer, item.change, item.type, item.body]);
+
+        state.edit.cases = cases;
+render();
+      }catch(error){
+        console.warn(error);
+      }
+    }
+async function loadGoogleSheetEquipmentGroup(config){
+  try{
+    const text = await fetchSheet(config.sheet);
+
+    if(text === sheetLastText.equipment[config.key]) return;
+
+    sheetLastText.equipment[config.key] = text;
+
+    const parsed = parseCSV(text);
+    const header = parsed[0] || [];
+    const rows = parsed.slice(1);
+
+    const cleanHeader = header.map(h =>
+      String(h || '')
+        .replace(/\s/g,'')
+        .replace(/　/g,'')
+        .trim()
+    );
+
+    const h0 = cleanHeader[0] || '';
+    const h1 = cleanHeader[1] || '';
+    const h2 = cleanHeader[2] || '';
+    const h3 = cleanHeader[3] || '';
+    const h4 = cleanHeader[4] || '';
+    const h5 = cleanHeader[5] || '';
+
+    const isEquipmentSheet =
+      h0 === '商品名' &&
+      h2 === '価格' &&
+      h4 === '掲載' &&
+      h5 === '問い合わせ' &&
+      h1.includes('規格') &&
+      h3.includes('説明');
+
+    if(!isEquipmentSheet){
+      console.warn(
+        `${config.sheet} の列見出しが飼育機材用ではありません。`,
+        header
+      );
+
+      state.edit.equipment[config.key] = [];
+      render();
+      return;
+    }
+
+    const items = rows
+      .map(r => ({
+        name: (r[0] || '').trim(),
+        spec: (r[1] || '').trim(),
+        price: (r[2] || '').trim(),
+        description: (r[3] || '').trim(),
+        published: normalizeStatus(r[4]),
+        contact: normalizeStatus(r[5]),
+        image: normalizeImageUrl(r[6])
+      }))
+      .filter(item => item.name && item.published !== '非表示')
+      .map(item => [
+        item.name,
+        item.spec,
+        item.price,
+        item.description,
+        item.contact,
+        item.image
+      ]);
+
+    state.edit.equipment[config.key] = items;
+    render();
+  }catch(error){
+    console.warn(`${config.sheet}の読み込みをスキップしました`, error);
+    state.edit.equipment[config.key] = [];
+    render();
+  }
+}
+function loadGoogleSheetEquipment(){
+  EQUIPMENT_SHEETS.forEach(config => {
+    loadGoogleSheetEquipmentGroup(config);
+  });
+}
+   function loadAllSheets(){
+  loadGoogleSheetFish();
+  loadGoogleSheetNews();
+  loadGoogleSheetCases();
+  loadGoogleSheetEquipment();
+}
+
+    function startSheetAutoSync(){
+      loadAllSheets();
+
+      if(sheetSyncTimer) clearInterval(sheetSyncTimer);
+
+      sheetSyncTimer = setInterval(loadAllSheets, 60000);
+
+      window.addEventListener('focus', loadAllSheets);
+
+      document.addEventListener('visibilitychange', () => {
+        if(!document.hidden) loadAllSheets();
+      });
+    }
+
+    function contactEnabled(f){
+      return normalizeStatus(f[4]) !== '非表示';
+    }
+
+    function productContactButton(f){
+      return contactEnabled(f)
+        ? '<button data-go="/contact">この生体について問い合わせる</button>'
+        : '';
+    }
+function equipmentContactEnabled(item){
+  return normalizeStatus(item[4]) !== '非表示';
+}
+
+function equipmentContactButton(item){
+  return equipmentContactEnabled(item)
+    ? '<button data-go="/contact">この商品について問い合わせる</button>'
+    : '';
+}
+    function go(p){
+      location.hash = p;
+      state.path = p;
+      state.menu = false;
+      window.scrollTo({ top:0, left:0, behavior:'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      render();
+    }
+
+    window.addEventListener('hashchange', () => {
+      state.path = getPath();
+      render();
+    });
+
+ function render(){
+  const caseNo = state.path.startsWith('/gallery/') ? Number(state.path.split('/').pop()) : -1;
+  const currentCase = state.edit.cases[caseNo];
+
+  const equipmentMatch = state.path.startsWith('/equipment/')
+    ? state.path.split('/')[2]
+    : null;
+
+  const currentEquipment = EQUIPMENT_SHEETS.find(x => x.key === equipmentMatch);
+
+  let page = '';
+
+  if(state.path === '/') page = Home();
+  else if(state.path === '/sell') page = Sell();
+  else if(state.path === '/equipment') page = Equipment();
+  else if(currentEquipment) page = EquipmentCategoryPage(currentEquipment);
+  else if(state.path === '/order') page = Order();
+  else if(state.path === '/support') page = Support();
+  else if(state.path === '/gallery') page = Gallery();
+  else if(currentCase) page = CaseDetail(currentCase);
+  else if(state.path === '/news') page = NewsPage();
+  else if(state.path === '/access') page = AccessPage();
+  else if(state.path === '/contact') page = Contact();
+  else if(state.path === '/admin') page = Admin();
+  else page = Shell('404','ページが見つかりません','指定されたURLは存在しません。','<button data-go="/">ホームへ戻る</button>');
+
+  document.getElementById('app').innerHTML = `
+    <div class="site ${state.view === 'sp' ? 'mobileView' : 'pcView'}">
+      ${state.opening ? Opening() : ''}
+      ${Header()}
+      ${state.menu ? MobileMenu() : ''}
+      ${page}
+      ${Footer()}
+    </div>
+  `;
+
+  bind();
+}
+
+    function bind(){
+      document.querySelectorAll('[data-go]').forEach(e => e.onclick = () => go(e.dataset.go));
+
+      document.querySelectorAll('[data-top]').forEach(e => e.onclick = () => {
+        window.scrollTo({ top:0, left:0, behavior:'smooth' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        const site = document.querySelector('.site');
+        if(site) site.scrollTop = 0;
+      });
+
+      document.querySelectorAll('[data-view]').forEach(e => e.onclick = () => {
+        state.view = e.dataset.view;
+        render();
+      });
+
+      const m = document.querySelector('[data-menu]');
+      if(m) m.onclick = () => {
+        state.menu = !state.menu;
+        render();
+      };
+
+      const s = document.querySelector('[data-skip]');
+      if(s) s.onclick = () => {
+        state.opening = false;
+        render();
+      };
+
+      const v = document.querySelector('.openingVideo');
+      if(v){
+        v.onended = v.onerror = () => {
+          state.opening = false;
+          render();
+        };
+      }
+
+      const loginForm = document.querySelector('[data-login]');
+      if(loginForm){
+        loginForm.onsubmit = e => {
+          e.preventDefault();
+          const pass = document.querySelector('[data-admin-password]').value;
+
+          if(pass === ADMIN_PASSWORD){
+            sessionStorage.setItem('ak-admin-login','true');
+            state.adminLoggedIn = true;
+            render();
+          }else{
+            alert('パスワードが違います');
+          }
+        };
+      }
+
+      const logout = document.querySelector('[data-logout]');
+      if(logout){
+        logout.onclick = () => {
+          sessionStorage.removeItem('ak-admin-login');
+          state.adminLoggedIn = false;
+          render();
+        };
+      }
+    }
+
+    function Header(){
+      return `
+        <header>
+          <button class="brand" data-go="/">
+            <b>アクアリウムかぶき</b>
+            <small>茨城県結城市</small>
+          </button>
+
+          <nav>
+            ${routes.slice(0,-1).map(([l,p]) => `
+              <button class="${
+  state.path === p ||
+  (p === '/gallery' && state.path.startsWith('/gallery/')) ||
+  (p === '/equipment' && state.path.startsWith('/equipment'))
+    ? 'on'
+    : ''
+}" data-go="${p}">
+${l}
+              </button>
+            `).join('')}
+          </nav>
+
+          <div class="viewSwitch">
+            <button class="${state.view === 'pc' ? 'on' : ''}" data-view="pc">PC</button>
+            <button class="${state.view === 'sp' ? 'on' : ''}" data-view="sp">スマホ</button>
+          </div>
+
+          <button class="cta" data-go="/contact">お問い合わせ</button>
+          <button class="hamb" data-menu>${state.menu ? '×' : '☰'}</button>
+        </header>
+      `;
+    }
+
+    function MobileMenu(){
+      return `
+        <div class="mobile">
+          ${routes.map(([l,p]) => `<button data-go="${p}">${l}</button>`).join('')}
+        </div>
+      `;
+    }
+
+    function Opening(){
+      const isSmartPhone = window.innerWidth <= 850 || state.view === 'sp';
+      const videoSrc = isSmartPhone ? 'opening-sp.mp4' : 'opening.mp4';
+
+      return `
+        <div class="openingLayer">
+          <video class="openingVideo" src="${videoSrc}" autoplay muted playsinline></video>
+          <button class="skipOpening" data-skip>SKIP</button>
+        </div>
+      `;
+    }
+
+    function Shell(sub,title,lead,body){
+      return `
+        <main class="shell">
+          <p class="sub">${sub}</p>
+          <h1>${title}</h1>
+          <p class="lead">${lead}</p>
+          ${body}
+          <button class="top" data-top>ページ上部へ</button>
+        </main>
+      `;
+    }
+
+    function Section(sub,title,body,white=false){
+      return `
+        <section class="section ${white ? 'white' : ''}">
+          <p class="sub">${sub}</p>
+          <h2>${title}</h2>
+          ${body}
+        </section>
+      `;
+    }
+
+    function Cards(items){
+      return `
+        <div class="grid">
+          ${items.map(([t,d,p]) => `
+            <article class="card" ${p ? `data-go="${p}"` : ''}>
+              <h3>${esc(t)}</h3>
+              <p>${esc(d)}</p>
+            </article>
+          `).join('')}
+        </div>
+      `;
+    }
+
+   function ProductImage(src, alt){
+  return src
+    ? `
+      <div class="productImageWrap">
+        <img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">
+      </div>
+    `
+    : '';
+}
+
+   function FishCards(){
+  return `
+    <div class="grid four">
+      ${state.edit.fish.map(f => `
+        <article class="card fishCard productImageCard">
+          ${ProductImage(f[5], f[0])}
+          <div class="fishCardMain">
+            <em>${esc(f[3])}</em>
+            <h3>${esc(f[0])}</h3>
+            <p>${esc(f[1])} / 在庫確認可</p>
+          </div>
+
+          <div class="fishCardBottom">
+            <b>${esc(f[2])}</b>
+            ${productContactButton(f)}
+          </div>
+        </article>
+      `).join('')}
+    </div>
+  `;
+}
+
+    function NewsCards(){
+      return `
+        <div class="grid">
+          ${state.edit.news.map(n => `
+            <article class="card">
+              <em>${esc(n[0])}</em>
+              <h3>${esc(n[1])}</h3>
+              <p>${esc(n[2])}</p>
+            </article>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function CaseCards(){
+      return `
+        <div class="grid">
+          ${state.edit.cases.map((c,i) => `
+            <article class="card" data-go="/gallery/${i}">
+              <em>${esc(c[3])}</em>
+              <h3>${esc(c[0])}</h3>
+              <p>${esc(c[1])} / ${esc(c[2])}</p>
+              <b>詳細を見る →</b>
+            </article>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function Home(){
+      return `
+        <section class="hero">
+          <div>
+            <p class="sub">YUKI IBARAKI</p>
+            <h1>アクアリウム<br>かぶき</h1>
+            <p>美しい観賞魚と理想の水景を、もっと身近に。生体販売から飼育機材、オーダー水槽、飼育実績のご紹介までサポートします。</p>
+            <button data-go="/sell">生体を見る</button>
+            <button class="ghost" data-go="/contact">お問い合わせ</button>
+          </div>
+        </section>
+
+        ${Section('SERVICE','取り扱いサービス',Cards([
+          ['生体販売','アロワナ・大型魚・熱帯魚をご案内します。','/sell'],
+          ['飼育機材','フィルター・照明・餌など幅広く対応。','/equipment'],
+          ['オーダー水槽','理想の水槽づくりをサポートします。','/order']
+        ]))}
+
+        ${Section('FEATURED','おすすめ生体',FishCards(),true)}
+
+        ${Section('OWNERS GALLERY','アクアリウム実例集',`
+          <p class="lead">オーナー様・店舗での飼育実績、オーダー水槽の現在、生体の成長記録を掲載。</p>
+          ${CaseCards()}
+          <button data-go="/gallery">実例集をもっと見る</button>
+          <p class="note">※掲載写真はお客様の許可をいただいた実例のみ掲載しています。写真・文章の無断転載を禁止します。</p>
+        `)}
+
+        ${Section('NEWS','お知らせ・ブログ',NewsCards(),true)}
+
+        ${Section('ACCESS','店舗情報・アクセス',`
+          ${AccessBlock()}
+          <button data-go="/access">アクセス詳細を見る</button>
+        `)}
+
+        ${Section('CONTACT','お問い合わせ',`
+          <p class="lead">在庫確認、飼育相談、オーダー水槽、機材取り寄せなどお気軽にお問い合わせください。</p>
+          <button data-go="/contact">お問い合わせフォームへ</button>
+        `,true)}
+      `;
+    }
+
+    function Sell(){
+      return Shell(
+        'LIVESTOCK',
+        '生体販売',
+        'アロワナ・大型魚・熱帯魚を中心に、状態・サイズ・発色・餌食いを確認してご案内します。',
+        `
+          <div class="productListGrid">
+            ${state.edit.fish.map(f => `
+              <article class="card productImageCard">
+                ${ProductImage(f[5], f[0])}
+                <em>${esc(f[3])}</em>
+                <h3>${esc(f[0])}</h3>
+                <p>${esc(f[1])} / 状態確認・取り置き相談可</p>
+                <p>発色・餌食い・混泳可否など、個体の状態を確認してご案内します。</p>
+                <b>${esc(f[2])}</b>
+                ${productContactButton(f)}
+              </article>
+            `).join('')}
+          </div>
+        `
+      );
+    }
+
+function Equipment(){
+  return Shell(
+    'EQUIPMENT',
+    '飼育機材',
+    'カテゴリ別に飼育機材を掲載しています。見たいカテゴリを選んでください。',
+    `
+      <div class="grid">
+        ${EQUIPMENT_SHEETS.map(config => `
+          <article class="card equipmentNavCard" data-go="/equipment/${config.key}">
+            <em>${esc(config.sheet)}</em>
+            <h3>${esc(config.title)}</h3>
+            <p>${esc(config.lead)}</p>
+            <b>このカテゴリを見る →</b>
+          </article>
+        `).join('')}
+      </div>
+    `
+  );
+}
+function EquipmentCategoryPage(config){
+  const items = state.edit.equipment?.[config.key] || [];
+
+  return Shell(
+    'EQUIPMENT',
+    config.title,
+    config.lead,
+    `
+      <div class="equipmentBackArea">
+        <button class="ghostDark" data-go="/equipment">← 飼育機材トップに戻る</button>
+      </div>
+
+      <div class="equipmentTabs">
+        ${EQUIPMENT_SHEETS.map(group => `
+          <button
+            class="${group.key === config.key ? 'active' : ''}"
+            data-go="/equipment/${group.key}"
+          >
+            ${esc(group.title)}
+          </button>
+        `).join('')}
+      </div>
+
+      ${
+        items.length
+          ? `
+            <div class="productListGrid">
+              ${items.map(item => `
+                <article class="card productImageCard">
+                  ${ProductImage(item[5], item[0])}
+                  <em>${esc(config.title)}</em>
+                  <h3>${esc(item[0])}</h3>
+                  <p>${esc(item[1])}</p>
+                  <p>${esc(item[3])}</p>
+                  <b>${esc(item[2])}</b>
+                  ${equipmentContactButton(item)}
+                </article>
+              `).join('')}
+            </div>
+          `
+          : `
+            <article class="card">
+              <em>${esc(config.title)}</em>
+              <h3>現在準備中です</h3>
+              <p>商品情報は店頭またはお問い合わせにてご確認ください。</p>
+            </article>
+          `
+      }
+    `
+  );
+}
+    
+    function Order(){
+      return Shell(
+        'CUSTOM TANK',
+        'オーダー水槽',
+        '設置場所・飼育魚・メンテナンス性に合わせて、水槽サイズ・ろ過・照明・台・配管までトータルでご相談いただけます。',
+        `
+          <div class="grid two">
+            <article class="card">
+              <em>STANDARD ORDER</em>
+              <h3>通常オーダー水槽</h3>
+              <p>サイズ・ろ過・照明・台・配管をヒアリングし、飼育魚や設置場所に合わせて製作します。</p>
+            </article>
+            <article class="card hot" data-go="/support">
+              <em>SUPPORT</em>
+              <h3>設置・飼育サポート</h3>
+              <p>納品後の管理性や飼育スタイルまで考え、長く維持しやすい水槽づくりをサポートします。</p>
+              <b>詳しく見る →</b>
+            </article>
+          </div>
+          ${Flow('オーダー水槽の流れ',['相談','仕様決定','見積もり','製作','設置','サポート'])}
+          <div class="mock">ORDER AQUARIUM</div>
+          <button data-go="/contact">オーダー水槽について問い合わせる</button>
+        `
+      );
+    }
+
+    function Flow(title,items){
+      return `
+        <h3 class="flowTitle">${title}</h3>
+        <div class="flow">
+          ${items.map((x,i) => `<div><span>0${i+1}</span>${esc(x)}</div>`).join('')}
+        </div>
+      `;
+    }
+
+    function Gallery(){
+      return Shell(
+        'OWNERS GALLERY',
+        'アクアリウム実例集',
+        'オーナー様・店舗での飼育実績、オーダー水槽の現在、購入された生体の成長記録を魚種・水槽ごとにまとめたページです。',
+        `
+          ${Cards([
+            ['魚別：アロワナ','辣椒紅龍・過背金龍などの成長記録。'],
+            ['魚別：ディスカス','ディスカスの飼育実例。'],
+            ['水槽別：大型魚水槽','オーダー水槽の納品時・現在の姿。']
+          ])}
+          ${CaseCards()}
+          <p class="note">※掲載写真はお客様の許可をいただいた実例のみ掲載しています。写真・文章の無断転載を禁止します。</p>
+        `
+      );
+    }
+
+    function CaseDetail(c){
+      return Shell(
+        'CASE STUDY',
+        esc(c[0]),
+        `${esc(c[1])}の実例です。導入時から現在までの変化や仕様・コメントを掲載します。`,
+        `
+          <article class="card">
+            <em>${esc(c[3])}</em>
+            <p><b>お客様：</b>${esc(c[1])}</p>
+            <p><b>内容：</b>${esc(c[4])}</p>
+            <p><b>変化：</b>${esc(c[2])}</p>
+            <p><b>お客様コメント：</b>導入後も状態良く育っていて、相談できるので安心です。</p>
+          </article>
+          <div class="flow">
+            <div>購入時 / 納品時</div>
+            <div>3ヶ月後</div>
+            <div>現在</div>
+            <div>ギャラリー</div>
+          </div>
+          <button data-go="/gallery">アクアリウム実例集に戻る</button>
+          <p class="note">※掲載写真はお客様の許可をいただいた実例のみ掲載しています。写真・文章の無断転載を禁止します。</p>
+        `
+      );
+    }
+
+    function NewsPage(){
+      return Shell(
+        'NEWS',
+        'お知らせ・ブログ',
+        '営業時間、入荷情報、飼育のポイントなどを掲載します。',
+        NewsCards()
+      );
+    }
+
+    function AccessPage(){
+      return Shell(
+        'ACCESS',
+        '店舗情報・アクセス',
+        '茨城県結城市大字結城13724にあるアクアリウムショップです。ご来店前の在庫確認や飼育相談もお気軽にお問い合わせください。',
+        AccessBlock()
+      );
+    }
+
+    function AccessBlock(){
+      return `
+        <div class="accessGrid">
+          <article class="accessPanel">
+            <div class="accessHead">
+              <em>SHOP INFORMATION</em>
+              <h3>アクアリウムかぶき</h3>
+              <p>茨城県結城市の観賞魚・アクアリウムショップです。熱帯魚、アロワナ、金魚、水草、水槽用品など、飼育に関するご相談もお気軽にお問い合わせください。</p>
+            </div>
+
+            <div class="infoList">
+              <div>
+                <span>SHOP NAME</span>
+                <p>アクアリウムかぶき</p>
+              </div>
+              <div>
+                <span>ADDRESS</span>
+                <p>〒307-0001<br>茨城県結城市大字結城13724</p>
+              </div>
+              <div>
+                <span>TEL</span>
+                <p><a href="tel:0296325775">0296-32-5775</a><br>在庫確認・飼育相談もお気軽にお問い合わせください。</p>
+              </div>
+              <div>
+                <span>OPEN</span>
+                <p>月〜金　11:00〜20:00<br>土日　10:00〜20:00</p>
+              </div>
+              <div>
+                <span>CLOSED</span>
+                <p>木曜日</p>
+              </div>
+            </div>
+
+            <div class="accessActions">
+              <a href="tel:0296325775">電話する</a>
+              <a href="https://www.google.com/maps/dir/?api=1&destination=%E8%8C%A8%E5%9F%8E%E7%9C%8C%E7%B5%90%E5%9F%8E%E5%B8%82%E5%A4%A7%E5%AD%97%E7%B5%90%E5%9F%8E13724" target="_blank" rel="noopener noreferrer">Googleマップで開く</a>
+            </div>
+          </article>
+
+          <div class="mapEmbed">
+            <iframe title="アクアリウムかぶき Googleマップ" src="https://www.google.com/maps?q=%E8%8C%A8%E5%9F%8E%E7%9C%8C%E7%B5%90%E5%9F%8E%E5%B8%82%E5%A4%A7%E5%AD%97%E7%B5%90%E5%9F%8E13724&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
+      `;
+    }
+
+    function Contact(){
+      return Shell(
+        'CONTACT',
+        'お問い合わせ',
+        '在庫確認、飼育相談、オーダー水槽、機材取り寄せなどお気軽にお問い合わせください。',
+        `
+          <form>
+            <label>名前<input placeholder="山田 太郎"></label>
+            <label>メール<input placeholder="example@email.com"></label>
+            <label>内容<textarea placeholder="お問い合わせ内容"></textarea></label>
+            <button type="button">送信する</button>
+          </form>
+        `
+      );
+    }
+
+    function Support(){
+      return Shell(
+        'DELIVERY / SETUP',
+        '設置・飼育サポート',
+        '水槽の配達・設置から、導入後の飼育環境づくりまでサポートします。',
+        `
+          <div class="grid two">
+            <article class="card hot">
+              <em>FREE DELIVERY</em>
+              <h3>30km圏内・1500mm〜1800mm水槽は無料対応</h3>
+              <p>店舗から30km圏内、1500mm〜1800mm水槽なら配達・設置無料で対応します。その他のサイズ・距離は応相談となります。</p>
+            </article>
+            <article class="card">
+              <em>AFTER SUPPORT</em>
+              <h3>納品後の飼育サポート</h3>
+              <p>ろ過・水質・照明・餌・メンテナンス性まで、長く維持しやすい飼育環境づくりをサポートします。</p>
+            </article>
+          </div>
+          <p class="note">※その他のサイズ・距離は応相談です。設置環境、搬入経路、水槽サイズ、作業内容によっては別途費用が発生する場合があります。詳細は事前にお問い合わせください。</p>
+          <button data-go="/contact">設置サポートについて問い合わせる</button>
+        `
+      );
+    }
+
+ function Admin(){
+  if(!state.adminLoggedIn) return AdminLogin();
+
+  return Shell(
+    'ADMIN',
+    '管理者ページ',
+    '公開HPの商品情報はGoogleスプレッドシートで管理します。',
+    `
+      <div class="adminTop">
+        <p class="note">ログイン中：管理者</p>
+        <button data-logout>ログアウト</button>
+      </div>
+
+      <article class="card hot">
+        <em>SPREADSHEET MANAGEMENT</em>
+        <h3>管理スプレッドシートを開く</h3>
+        <p>
+          生体販売・餌・濾過設備・照明・水質管理・水槽用品は、
+          Googleスプレッドシート内の各管理タブで更新します。
+        </p>
+        <p>
+          このADMINページで直接商品を編集するのではなく、
+          スプレッドシートを更新すると公開HPに反映されます。
+        </p>
+
+        <div class="sheetOpenArea">
+          <a href="${GOOGLE_SHEET_EDIT_URL}" target="_blank" rel="noopener noreferrer" class="adminLinkBtn">
+            管理スプレッドシートを開く
+          </a>
+        </div>
+      </article>
+
+      <article class="card">
+        <em>LIVESTOCK SHEET</em>
+        <h3>生体販売：商品管理シート</h3>
+        <p>
+          シート名は必ず <b>商品管理</b> にしてください。
+          1行目は見出し、2行目以降に商品情報を入力します。
+        </p>
+
+        <div class="adminTableWrap">
+          <table class="adminTable">
+            <thead>
+              <tr>
+                <th>列</th>
+                <th>項目</th>
+                <th>入力例</th>
+                <th>HPでの役割</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>A列</td><td>商品名</td><td>辣椒紅龍（スーパーレッドアジアアロワナ）</td><td>商品カードの見出し</td></tr>
+              <tr><td>B列</td><td>サイズ</td><td>24cm前後</td><td>サイズ表示</td></tr>
+              <tr><td>C列</td><td>価格</td><td>¥158,000</td><td>価格表示</td></tr>
+              <tr><td>D列</td><td>分類</td><td>アロワナ</td><td>赤文字の分類ラベル</td></tr>
+              <tr><td>E列</td><td>掲載</td><td>表示 / 非表示</td><td>商品をHPに出すか消すか</td></tr>
+              <tr><td>F列</td><td>問い合わせ</td><td>表示 / 非表示</td><td>問い合わせボタンを出すか消すか</td></tr>
+              <tr><td>G列</td><td>画像URL</td><td>https://drive.google.com/thumbnail?id=...</td><td>商品画像を表示</td></tr>
+              <tr><td>H列</td><td>画像検索名</td><td>辣椒紅龍 24cm前後</td><td>Apps Scriptの画像自動照合に使用</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card">
+        <em>EQUIPMENT SHEETS</em>
+        <h3>飼育機材：カテゴリ別管理シート</h3>
+        <p>
+          飼育機材はカテゴリごとにシートを分けて管理します。
+          各シートの列構成は共通です。
+        </p>
+
+        <div class="adminTableWrap">
+          <table class="adminTable">
+            <thead>
+              <tr>
+                <th>シート名</th>
+                <th>管理カテゴリ</th>
+                <th>列構成</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>餌管理</td>
+                <td>餌・フード類</td>
+                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ / G:画像URL / H:画像検索名</td>
+              </tr>
+              <tr>
+                <td>濾過設備管理</td>
+                <td>フィルター・濾材・ポンプ類</td>
+                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ / G:画像URL / H:画像検索名</td>
+              </tr>
+              <tr>
+                <td>照明管理</td>
+                <td>LEDライト・照明用品</td>
+                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ / G:画像URL / H:画像検索名</td>
+              </tr>
+              <tr>
+                <td>水質管理</td>
+                <td>カルキ抜き・バクテリア・添加剤</td>
+                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ / G:画像URL / H:画像検索名</td>
+              </tr>
+              <tr>
+                <td>水槽用品管理</td>
+                <td>ヒーター・エア用品・メンテナンス用品</td>
+                <td>A:商品名 / B:規格・対応サイズ / C:価格 / D:説明 / E:掲載 / F:問い合わせ / G:画像URL / H:画像検索名</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card">
+        <em>DISPLAY RULE</em>
+        <h3>掲載・問い合わせの表示ルール</h3>
+
+        <div class="adminTableWrap">
+          <table class="adminTable">
+            <thead>
+              <tr>
+                <th>状態</th>
+                <th>掲載</th>
+                <th>問い合わせ</th>
+                <th>HPでの見え方</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>販売中・通常掲載</td>
+                <td>表示</td>
+                <td>表示</td>
+                <td>商品と問い合わせボタンを表示</td>
+              </tr>
+              <tr>
+                <td>売約済み・問い合わせ停止</td>
+                <td>表示</td>
+                <td>非表示</td>
+                <td>商品は残す。問い合わせボタンだけ非表示</td>
+              </tr>
+              <tr>
+                <td>完全に非公開</td>
+                <td>非表示</td>
+                <td>非表示</td>
+                <td>HPの商品一覧から消す</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card">
+        <em>OPTIONAL SHEETS</em>
+        <h3>次に増やせる管理シート</h3>
+        <p>
+          お知らせ・実例集もスプレッドシートで管理できます。
+          まだ作っていない場合でもHPは止まりません。
+        </p>
+
+        <div class="adminTableWrap">
+          <table class="adminTable">
+            <thead>
+              <tr>
+                <th>シート名</th>
+                <th>列構成</th>
+                <th>用途</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>お知らせ管理</td>
+                <td>A:カテゴリ / B:タイトル / C:本文 / D:掲載</td>
+                <td>お知らせ・入荷情報・営業時間変更</td>
+              </tr>
+              <tr>
+                <td>実例管理</td>
+                <td>A:タイトル / B:お客様 / C:変化 / D:分類 / E:内容 / F:掲載</td>
+                <td>アクアリウム実例集・成長記録</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card">
+        <em>UPDATE TIMING</em>
+        <h3>反映の目安</h3>
+        <p>
+          HPは約60秒ごとにスプレッドシートを再読み込みします。
+          変更後すぐに反映されない場合は、1〜3分待ってからHPを再読み込みしてください。
+        </p>
+        <p>
+          ページを開き直した時、または別タブから戻った時にも再読み込みします。
+        </p>
+      </article>
+
+      <article class="card">
+        <em>TROUBLE CHECK</em>
+        <h3>更新されない時の確認</h3>
+        <div class="adminChecklist">
+          ・シート名が指定通りになっている<br>
+          ・A〜F列の順番が変わっていない<br>
+          ・画像を出す場合はG列に画像URLが入っている<br>
+          ・A列の商品名が空欄になっていない<br>
+          ・E列の掲載が <b>表示</b> になっている<br>
+          ・問い合わせボタンを出したい場合、F列が <b>表示</b> になっている<br>
+          ・Googleスプレッドシートがリンク共有で閲覧可能になっている<br>
+          ・HPを再読み込みしている<br>
+          ・GitHubに最新のindex.htmlが反映されている
+        </div>
+      </article>
+
+      <article class="card">
+        <em>IMPORTANT</em>
+        <h3>注意</h3>
+        <div class="adminNotice">
+          各管理シートはHPに読み込まれる公開用データです。<br>
+          仕入れ値、業者名、個人情報、内部メモなど、お客さんに見せたくない情報は入れないでください。
+        </div>
+      </article>
+    `
+  );
+}
+    function AdminLogin(){
+      return Shell(
+        'ADMIN LOGIN',
+        '管理者ログイン',
+        '管理者ページへ入るにはパスワードを入力してください。',
+        `
+          <form class="loginForm" data-login>
+            <label>
+              パスワード
+              <input type="password" data-admin-password placeholder="管理者パスワード">
+            </label>
+            <button type="submit">ログイン</button>
+          </form>
+        `
+      );
+    }
+
+    function Footer(){
+      return `
+        <footer>
+          <b>アクアリウムかぶき</b>
+          <p>観賞魚・大型魚・飼育機材・オーダー水槽の専門店。</p>
+          <small>© 2026 Aquarium Kabuki All Rights Reserved.</small>
+        </footer>
+      `;
+    }
+
+    render();
+    startSheetAutoSync();
+  </script>
+</body>
+</html>
+      "streetAddress": "大字結城13724",
+      "addressCountry": "JP"
+    },
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Friday"],
+        "opens": "11:00",
+        "closes": "20:00"
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Saturday", "Sunday"],
+        "opens": "10:00",
+        "closes": "20:00"
+      }
+    ],
+    "priceRange": "¥¥",
+    "hasMap": "https://www.google.com/maps/search/?api=1&query=%E8%8C%A8%E5%9F%8E%E7%9C%8C%E7%B5%90%E5%9F%8E%E5%B8%82%E5%A4%A7%E5%AD%97%E7%B5%90%E5%9F%8E13724"
+  }
+  </script>
+
+  <style>
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;background:#f3f4f6;color:#111827;letter-spacing:.02em;-webkit-font-smoothing:antialiased}
+    button{font:inherit;cursor:pointer}
+    header{position:sticky;top:0;z-index:1000;background:rgba(2,6,9,.92);backdrop-filter:blur(14px);color:white;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 5vw;border-bottom:1px solid #ffffff14}
+    .brand{border:0;background:transparent;color:white;text-align:left;flex-shrink:0;min-width:max-content;cursor:pointer;padding:0}
+    .brand b{display:block;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;letter-spacing:.08em;font-weight:900;font-size:15px;line-height:1.1}
+    .brand small{display:block;color:#ffffff88;font-size:10px;letter-spacing:.06em;white-space:nowrap;margin-top:2px}
+    nav{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;min-width:0}
+    nav button,.hamb,.mobile button{border:0;background:transparent;color:white;padding:9px 9px;border-radius:999px;font-weight:800;font-size:12px;letter-spacing:.02em;line-height:1;white-space:nowrap;word-break:keep-all;flex-shrink:0}
+    .on,nav button:hover{background:#dc262638}
+    .cta,section button,main button,form button{border:0;border-radius:999px;padding:12px 18px;background:linear-gradient(135deg,#8f1010,#dc2626 60%,#ef4444);color:white;font-weight:900;letter-spacing:.04em;box-shadow:0 14px 30px #7f1d1d38;white-space:nowrap;flex-shrink:0}
+    .hamb{display:none}
+    .viewSwitch{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:3px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06);white-space:nowrap;flex-shrink:0}
+    .viewSwitch button{border:0;background:transparent;color:rgba(255,255,255,.62);border-radius:999px;padding:7px 11px;font-size:10px;font-weight:900;letter-spacing:.02em;line-height:1;box-shadow:none;transition:.2s;white-space:nowrap;word-break:keep-all;min-width:42px;text-align:center}
+    .viewSwitch button.on{background:linear-gradient(135deg,#b91c1c,#ef4444);color:#fff;box-shadow:0 6px 16px rgba(127,29,29,.32)}
+
+    .openingLayer{position:fixed;inset:0;z-index:9999;background:#020609;display:grid;place-items:center}
+    .openingVideo{width:100%;height:100%;object-fit:cover}
+    .skipOpening{position:absolute;right:22px;bottom:22px;border:1px solid #ffffff44;background:#0008;color:white;border-radius:999px;padding:10px 16px}
+
+    .site.mobileView{max-width:430px;margin:0 auto;min-height:100vh;box-shadow:0 0 0 1px #00000012,0 30px 80px #0002;overflow-wrap:break-word;word-break:normal;line-break:strict}
+    .mobile{display:grid;background:#020609;padding:12px 5vw;border-bottom:1px solid #ffffff14;position:sticky;top:58px;z-index:999;box-shadow:0 14px 30px rgba(0,0,0,.28)}
+    .site.mobileView>.mobile{max-width:430px;margin:0 auto}
+
+    .hero{position:relative;overflow:hidden;background:radial-gradient(circle at 22% 45%,#dc262640,transparent 28%),radial-gradient(circle at 72% 24%,#0ea5e922,transparent 26%),linear-gradient(180deg,#020609,#06131d 55%,#08121b);color:white;min-height:82vh;display:grid;align-items:center;padding:86px 6vw}
+    .hero:after{content:'AQUARIUM';position:absolute;right:5vw;bottom:8vh;font-size:clamp(54px,12vw,160px);font-weight:900;letter-spacing:.18em;color:#ffffff08}
+    .hero h1{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:clamp(52px,8vw,96px);line-height:1.02;margin:0 0 20px;font-weight:900;letter-spacing:.08em;text-shadow:0 16px 38px #0008}
+    .hero p{max-width:720px;color:#ffffffe0;line-height:2;font-size:16px}
+    .ghost{background:transparent!important;border:1px solid #ffffff55!important;box-shadow:none!important;margin-left:10px}
+
+    .section,.shell{max-width:1120px;margin:auto;padding:84px 22px}
+    .white{max-width:none;background:linear-gradient(180deg,#fff,#fafafa);padding-left:max(22px,calc((100vw - 1120px)/2));padding-right:max(22px,calc((100vw - 1120px)/2))}
+    .sub,em{color:#dc2626;font-style:normal;font-weight:1000;font-size:11px;letter-spacing:.24em;text-transform:uppercase}
+    .section h2,.shell h1{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:clamp(36px,5.5vw,68px);line-height:1.12;text-align:center;margin:10px 0 18px;font-weight:900;letter-spacing:.08em}
+    .section h2:after,.shell h1:after{content:'';display:block;width:56px;height:2px;margin:18px auto 0;background:linear-gradient(90deg,#7f1d1d,#ef4444,#fca5a5)}
+    .section>.sub,.shell>.sub,.lead{text-align:center}
+    .lead{max-width:780px;margin:0 auto 34px;color:#64748b;line-height:2}
+
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .grid.four{grid-template-columns:repeat(4,1fr)}
+    .grid.two{grid-template-columns:repeat(2,1fr)}
+    .card,form,.mock{background:linear-gradient(180deg,#fff,#fbfbfc);border:1px solid #e5e7eb;border-radius:28px;padding:26px;box-shadow:0 18px 45px #0f172a12}
+    .card{transition:.22s}
+    .card:hover{transform:translateY(-4px);box-shadow:0 24px 54px #0f172a18}
+    .card h3{font-size:23px;margin:13px 0;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-weight:900;letter-spacing:.05em}
+    .card p{color:#64748b;line-height:1.9}
+    .card b{display:block;margin-top:12px;color:#111827}
+    .hot{background:linear-gradient(180deg,#fff,#fff7f7);border-color:#fecaca}
+    .list{display:grid;gap:20px}
+    .flow{display:grid;grid-template-columns:repeat(6,1fr);gap:11px;margin:18px 0 32px}
+    .flow div{background:white;border:1px solid #e5e7eb;border-radius:20px;padding:18px 12px;text-align:center;font-weight:900;box-shadow:0 10px 24px #0f172a0a}
+    .flow span{display:block;color:#dc2626;margin-bottom:5px}
+    .flowTitle{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:24px;margin:34px 0 12px}
+    .mock{min-height:290px;display:grid;place-items:center;background:radial-gradient(circle at 60% 22%,#0ea5e933,transparent 28%),linear-gradient(180deg,#020609,#0f172a);color:#ffffff99;text-align:center;font-size:30px;font-weight:1000;letter-spacing:.12em}
+
+    .accessGrid{display:grid;grid-template-columns:.9fr 1.1fr;gap:24px;align-items:stretch}
+    .accessPanel{background:linear-gradient(180deg,#fff,#fbfbfc);border:1px solid #e5e7eb;border-radius:30px;padding:30px;box-shadow:0 18px 45px #0f172a12}
+    .accessHead h3{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:30px;margin:12px 0 10px;letter-spacing:.06em}
+    .accessHead p{color:#64748b;line-height:1.8;margin:0 0 24px}
+    .infoList{display:grid;gap:12px}
+    .infoList div{padding:16px 0;border-top:1px solid #e5e7eb}
+    .infoList span{display:block;color:#dc2626;font-size:11px;font-weight:1000;letter-spacing:.18em;margin-bottom:7px}
+    .infoList p{margin:0;color:#334155;line-height:1.75}
+    .infoList a{color:#dc2626;text-decoration:none;font-weight:900}
+    .accessActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+    .accessActions a{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:12px 16px;font-weight:900;text-decoration:none}
+    .accessActions a:first-child{background:linear-gradient(135deg,#8f1010,#dc2626 60%,#ef4444);color:white;box-shadow:0 14px 30px #7f1d1d38}
+    .accessActions a:last-child{background:#111827;color:white}
+    .mapEmbed{min-height:420px;border-radius:30px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 18px 45px #0f172a12;background:#fff}
+    .mapEmbed iframe{width:100%;height:100%;min-height:420px;border:0;display:block}
+
+    .note{font-size:13px;color:#64748b;text-align:center;line-height:1.8}
+    .top{display:block;margin:42px auto 0;background:white;color:#555;border:1px solid #ddd;box-shadow:none}
+    form{display:grid;gap:15px;max-width:720px}
+    label{display:grid;gap:8px;font-weight:900}
+    input,textarea{border:1px solid #ddd;border-radius:16px;padding:13px;font:inherit}
+    textarea{min-height:130px}
+
+    .loginForm{max-width:520px;margin:0 auto}
+    .adminTop{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:22px;flex-wrap:wrap}
+    .adminTop button{background:#111827}
+    .adminLinkBtn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:12px 18px;background:linear-gradient(135deg,#8f1010,#dc2626 60%,#ef4444);color:white;font-weight:900;text-decoration:none;box-shadow:0 14px 30px #7f1d1d38;margin-top:12px}
+    .adminLinkBtn.dark{background:#111827;box-shadow:none}
+    .adminTableWrap{overflow-x:auto;margin-top:16px;border:1px solid #e5e7eb;border-radius:18px;background:#fff}
+    .adminTable{width:100%;border-collapse:collapse;font-size:14px;min-width:620px}
+    .adminTable th,.adminTable td{text-align:left;padding:12px;border-bottom:1px solid #e5e7eb;vertical-align:top}
+    .adminTable th{background:#f8fafc;color:#111827;font-weight:900}
+    .adminTable tr:last-child td{border-bottom:0}
+    .adminChecklist{line-height:2;color:#475569;font-weight:800}
+    .adminNotice{background:#fff7f7;border:1px solid #fecaca;border-radius:20px;padding:18px;color:#7f1d1d;font-weight:900;line-height:1.8}
+
+    footer{background:linear-gradient(180deg,#020609,#081018);color:white;padding:46px 6vw}
+    footer p,footer small{color:#ffffff99}
+
+    @media(max-width:850px){
+      nav,.cta,.viewSwitch{display:none}
+      .hamb{display:block}
+      .grid,.grid.four,.grid.two,.flow,.accessGrid{grid-template-columns:1fr}
+      .accessPanel{padding:24px}
+      .mapEmbed,.mapEmbed iframe{min-height:320px}
+      .hero{min-height:auto;padding:70px 22px}
+      .section,.shell{padding:58px 20px}
+      .hero h1{font-size:48px;letter-spacing:.04em;line-height:1.08}
+      .hero p{font-size:15px;line-height:1.95;text-align:left}
+      .section h2,.shell h1{font-size:36px;letter-spacing:.04em;line-height:1.18}
+      .lead{font-size:14px;line-height:1.95;text-align:left}
+      .card h3{font-size:22px;line-height:1.45;letter-spacing:.03em}
+      .card p,.note{font-size:14px;line-height:1.9;text-align:left}
+      .sub,em{letter-spacing:.16em}
+      .brand b{font-size:15px;letter-spacing:.06em}
+      .brand small{font-size:10px}
+      .mock{font-size:24px;letter-spacing:.08em}
+      .flow div{line-height:1.55}
+      .mobileView nav,.mobileView .cta{display:none}
+      .mobileView .hamb{display:block}
+    }
+.adminBlock{
+  margin:34px 0;
+  padding:24px;
+  border:1px solid #e5e7eb;
+  border-radius:28px;
+  background:#fff;
+  box-shadow:0 18px 45px #0f172a12;
+}
+
+.equipmentNavCard{
+  cursor:pointer;
+}
+
+.equipmentNavCard:hover{
+  transform:translateY(-4px);
+}
+
+.equipmentSection{
+  scroll-margin-top:90px;
+}
+
+.sheetOpenArea{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+
+/* 飼育機材カテゴリページ */
+.equipmentBackArea{
+  margin:0 0 18px;
+  display:flex;
+  justify-content:center;
+}
+
+.ghostDark{
+  background:#111827!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
+
+.equipmentTabs{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin:0 0 28px;
+}
+
+.equipmentTabs button{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#111827;
+  box-shadow:none;
+  border-radius:999px;
+  padding:10px 14px;
+  font-size:13px;
+  font-weight:900;
+}
+
+.equipmentTabs button.active{
+  background:linear-gradient(135deg,#8f1010,#dc2626 60%,#ef4444);
+  color:#fff;
+  border-color:#dc2626;
+  box-shadow:0 14px 30px #7f1d1d28;
+}
+
+/* おすすめ生体カード：価格と問い合わせボタンを下揃え */
+.fishCard{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:315px;
+}
+
+.fishCardMain{
+  display:block;
+}
+
+.fishCard h3{
+  min-height:72px;
+}
+
+.fishCardBottom{
+  margin-top:auto;
+  display:grid;
+  gap:16px;
+}
+
+.fishCardBottom b{
+  margin-top:0!important;
+}
+
+/* 問い合わせボタン共通：一行表示＋上の文字から離す */
+.card button[data-go="/contact"]{
+  margin-top:24px!important;
+  white-space:nowrap!important;
+  word-break:keep-all!important;
+  line-height:1.2!important;
+  font-size:14px;
+  padding:13px 18px;
+}
+
+.fishCardBottom button[data-go="/contact"]{
+  margin-top:0!important;
+  width:100%;
+  white-space:nowrap!important;
+  word-break:keep-all!important;
+  font-size:13px;
+  padding:13px 8px;
+}
+
+/* セクション直下のボタンを中央揃え */
+.section > button{
+  display:block;
+  width:fit-content;
+  max-width:100%;
+  margin:28px auto 0;
+}
+
+/* 実例集・アクセス・お問い合わせボタンの見た目整理 */
+.section > button[data-go="/gallery"],
+.section > button[data-go="/access"],
+.section > button[data-go="/contact"]{
+  white-space:nowrap;
+  word-break:keep-all;
+}
+
+/* 生体販売ページ・飼育機材ページの問い合わせボタンも少し離す */
+.list .card button[data-go="/contact"]{
+  margin-top:24px!important;
+}
+
+/* 文字が長くても一行に収めやすくする */
+@media(min-width:851px){
+  .grid.four .card button[data-go="/contact"]{
+    font-size:13px;
+    padding-left:8px;
+    padding-right:8px;
+  }
+}
+
+@media(max-width:850px){
+  .equipmentTabs{
+    justify-content:flex-start;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    padding-bottom:6px;
+  }
+
+  .equipmentTabs button{
+    flex:0 0 auto;
+    font-size:12px;
+    padding:9px 12px;
+  }
+
+  .fishCard{
+    min-height:auto;
+  }
+
+  .fishCard h3{
+    min-height:auto;
+  }
+
+  .card button[data-go="/contact"]{
+    width:100%;
+    font-size:14px;
+  }
+
+  .section > button{
+    width:100%;
+    max-width:320px;
+  }
+}
+
+
+/* 商品画像表示 */
+.productImageCard{
+  overflow:hidden;
+}
+
+.productImageWrap{
+  width:100%;
+  aspect-ratio:4 / 3;
+  border-radius:20px;
+  overflow:hidden;
+  background:#f8fafc;
+  margin-bottom:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #eef2f7;
+}
+
+.productImageWrap img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  padding:10px;
+}
   </style>
 </head>
 
