@@ -863,7 +863,7 @@ const GOOGLE_SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_S
        state.edit.fish = fish;
 render();
       }catch(error){
-        console.warn(error);
+        console.warn('生体データの読み込みをスキップしました。前回データを維持します。', error);
       }
     }
 
@@ -888,7 +888,7 @@ render();
     state.edit.news = news;
 render();
       }catch(error){
-        console.warn(error);
+        console.warn('お知らせデータの読み込みをスキップしました。前回データを維持します。', error);
       }
     }
 
@@ -915,7 +915,7 @@ render();
         state.edit.cases = cases;
 render();
       }catch(error){
-        console.warn(error);
+        console.warn('実例データの読み込みをスキップしました。前回データを維持します。', error);
       }
     }
 async function loadGoogleSheetEquipmentGroup(config){
@@ -932,6 +932,7 @@ async function loadGoogleSheetEquipmentGroup(config){
 
     const cleanHeader = header.map(h =>
       String(h || '')
+        .replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
         .replace(/\s/g,'')
         .replace(/　/g,'')
         .trim()
@@ -945,21 +946,16 @@ async function loadGoogleSheetEquipmentGroup(config){
     const h5 = cleanHeader[5] || '';
 
     const isEquipmentSheet =
-      h0 === '商品名' &&
-      h2 === '価格' &&
-      h4 === '掲載' &&
-      h5 === '問い合わせ' &&
-      h1.includes('規格') &&
-      h3.includes('説明');
+      h0.includes('商品') &&
+      h2.includes('価格') &&
+      (h4.includes('掲載') || h4.includes('表示')) &&
+      (h5.includes('問い合わせ') || h5.includes('問合'));
 
     if(!isEquipmentSheet){
       console.warn(
-        `${config.sheet} の列見出しが飼育機材用ではありません。`,
-        header
+        `${config.sheet} のヘッダーが想定と異なります。前回データを維持します。`,
+        { 期待: 'A列:商品名 C列:価格 E列:掲載 F列:問い合わせ', 実際: header }
       );
-
-      state.edit.equipment[config.key] = [];
-      render();
       return;
     }
 
@@ -986,9 +982,7 @@ async function loadGoogleSheetEquipmentGroup(config){
     state.edit.equipment[config.key] = items;
     render();
   }catch(error){
-    console.warn(`${config.sheet}の読み込みをスキップしました`, error);
-    state.edit.equipment[config.key] = [];
-    render();
+    console.warn(`${config.sheet}の読み込みをスキップしました。前回データを維持します。`, error);
   }
 }
 function loadGoogleSheetEquipment(){
